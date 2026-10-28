@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ClientsRouteImport } from './routes/clients'
 import { Route as FinanceRouteImport } from './routes/finance'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as TeamRouteImport } from './routes/team'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
 import { Route as SoonModuleRouteImport } from './routes/soon.$module'
@@ -37,6 +38,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/clients': typeof ClientsRoute
   '/finance': typeof FinanceRoute
   '/settings': typeof SettingsRoute
+  '/team': typeof TeamRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/soon/$module': typeof SoonModuleRoute
   '/projects/': typeof ProjectsIndexRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/clients': typeof ClientsRoute
   '/finance': typeof FinanceRoute
   '/settings': typeof SettingsRoute
+  '/team': typeof TeamRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/soon/$module': typeof SoonModuleRoute
   '/projects': typeof ProjectsIndexRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/clients': typeof ClientsRoute
   '/finance': typeof FinanceRoute
   '/settings': typeof SettingsRoute
+  '/team': typeof TeamRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/soon/$module': typeof SoonModuleRoute
   '/projects/': typeof ProjectsIndexRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/clients'
     | '/finance'
     | '/settings'
+    | '/team'
     | '/projects/$projectId'
     | '/soon/$module'
     | '/projects/'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/clients'
     | '/finance'
     | '/settings'
+    | '/team'
     | '/projects/$projectId'
     | '/soon/$module'
     | '/projects'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/clients'
     | '/finance'
     | '/settings'
+    | '/team'
     | '/projects/$projectId'
     | '/soon/$module'
     | '/projects/'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   ClientsRoute: typeof ClientsRoute
   FinanceRoute: typeof FinanceRoute
   SettingsRoute: typeof SettingsRoute
+  TeamRoute: typeof TeamRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
   SoonModuleRoute: typeof SoonModuleRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/projects/': {
       id: '/projects/'
       path: '/projects'
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClientsRoute: ClientsRoute,
   FinanceRoute: FinanceRoute,
   SettingsRoute: SettingsRoute,
+  TeamRoute: TeamRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRoute,
   SoonModuleRoute: SoonModuleRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,

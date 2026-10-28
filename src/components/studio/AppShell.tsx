@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, Heart, Globe, BrainCircuit, FlaskConical, Users, Wallet, Image, CalendarDays, Settings,
-  ChevronDown, Search, Bell, Plus, Menu, X, Mountain, Sun, Moon,
+  UsersRound, ChevronDown, Search, Bell, Plus, Menu, X, Mountain, Sun, Moon,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,7 @@ const NAV: Group[] = [
   { label: "Finance & Invoices", icon: Wallet, items: [
     { label: "Financial Overview", to: "/finance" }, { label: "Invoices", to: soon("invoices") },
   ]},
+  { label: "Our Team", icon: UsersRound, to: "/team" },
   { label: "Content & Media", icon: Image, to: soon("media") },
   { label: "Tasks & Calendar", icon: CalendarDays, to: soon("calendar") },
   { label: "Settings", icon: Settings, to: "/settings" },
