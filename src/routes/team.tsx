@@ -199,7 +199,7 @@ function TeamPage() {
 }
 
 function WorkerCard({ worker, index, photo, admin, onEdit, onDelete }: {
-  worker: Worker; index: number; photo?: string; admin: boolean; onEdit: () => void; onDelete: () => void;
+  worker: Worker; index: number; photo?: string | undefined; admin: boolean; onEdit: () => void; onDelete: () => void;
 }) {
   const status = asStatus(worker.status);
   return (
@@ -230,7 +230,7 @@ function WorkerCard({ worker, index, photo, admin, onEdit, onDelete }: {
 const initials = (n: string) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("") || "?";
 
 function WorkerDialog({ worker, photoUrl, onClose, onSaved }: {
-  worker: Worker | null; photoUrl?: string; onClose: () => void; onSaved: () => void;
+  worker: Worker | null; photoUrl?: string | undefined; onClose: () => void; onSaved: () => void;
 }) {
   const [name, setName] = useState(worker?.name ?? "");
   const [role, setRole] = useState(worker?.role ?? "");
@@ -261,7 +261,7 @@ function WorkerDialog({ worker, photoUrl, onClose, onSaved }: {
       let id = worker?.id;
       if (!id) {
         const { data: { user } } = await supabase.auth.getUser();
-        const { data, error } = await supabase.from("workers").insert({ ...fields, created_by: user?.id }).select("id").single();
+        const { data, error } = await supabase.from("workers").insert({ ...fields, created_by: user?.id ?? null }).select("id").single();
         if (error) throw error;
         id = data.id;
       }
