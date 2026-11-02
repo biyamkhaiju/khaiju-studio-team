@@ -21,20 +21,21 @@ export function QuickCreateDialog({ kind, onClose }: { kind: CreateKind | null; 
   const navigate = useNavigate();
   const [f, setF] = useState<Record<string, string>>({});
   const [err, setErr] = useState("");
+  const [busy,setBusy]=useState(false);
   const v = (k: string) => f[k] ?? "";
   const up = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value });
   const close = () => { setF({}); setErr(""); onClose(); };
   const today = new Date().toISOString().slice(0, 10);
   const isProject = kind === "wedding" || kind === "website" || kind === "ml";
 
-  const submit = () => {
+  const submit = async () => {
     if (!kind) return;
     if (isProject) {
       if (!v("name").trim() || !v("clientId") || !v("deadline")) return setErr("Name, client and deadline are required.");
       const budget = Number(v("budget") || 0);
       if (budget < 0) return setErr("Budget can't be negative.");
       const id = uid();
-      set((d) => ({
+      const saved = await set((d) => ({
         ...d,
         projects: [...d.projects, {
           id, name: v("name").trim(), division: kind, clientId: v("clientId"), status: "planning", budget,
@@ -42,6 +43,7 @@ export function QuickCreateDialog({ kind, onClose }: { kind: CreateKind | null; 
           milestones: TEMPLATES[kind].map((t) => ({ id: uid(), title: t, done: false })), manualProgress: 0,
         }],
       }));
+      if(!saved)return setErr("Could not save project. Please retry.");
       log(`New ${DIVISIONS[kind].short} project created: ${v("name").trim()}`);
       close();
       navigate({ to: "/projects/$projectId", params: { projectId: id } });
@@ -49,7 +51,8 @@ export function QuickCreateDialog({ kind, onClose }: { kind: CreateKind | null; 
     }
     if (kind === "client") {
       if (!v("name").trim()) return setErr("Name is required.");
-      set((d) => ({ ...d, clients: [...d.clients, { id: uid(), name: v("name").trim(), kind: (v("ckind") || "business") as Client["kind"], email: v("email"), phone: v("phone"), location: v("location"), createdAt: today }] }));
+      const saved=await set((d) => ({ ...d, clients: [...d.clients, { id: uid(), name: v("name").trim(), kind: (v("ckind") || "business") as Client["kind"], email: v("email"), phone: v("phone"), location: v("location"), createdAt: today }] }));
+      if(!saved)return setErr("Could not save client. Please retry.");
       log(`New client registered: ${v("name").trim()}`);
       return close();
     }
@@ -57,11 +60,11 @@ export function QuickCreateDialog({ kind, onClose }: { kind: CreateKind | null; 
     if (!(amount > 0)) return setErr("Enter an amount greater than 0.");
     if (kind === "payment") {
       if (!v("projectId")) return setErr("Choose a project.");
-      set((d) => ({ ...d, payments: [...d.payments, { id: uid(), projectId: v("projectId"), amount, date: v("date") || today, note: v("note") }] }));
+      if(!await set((d) => ({ ...d, payments: [...d.payments, { id: uid(), projectId: v("projectId"), amount, date: v("date") || today, note: v("note") }] })))return setErr("Could not save entry. Please retry.");
       log(`Payment received — NPR ${amount.toLocaleString("en-IN")}`);
     } else {
       if (!v("category").trim()) return setErr("Category is required.");
-      set((d) => ({ ...d, expenses: [...d.expenses, { id: uid(), projectId: v("projectId") || null, category: v("category").trim(), amount, date: v("date") || today, note: v("note") }] }));
+      if(!await set((d) => ({ ...d, expenses: [...d.expenses, { id: uid(), projectId: v("projectId") || null, category: v("category").trim(), amount, date: v("date") || today, note: v("note") }] })))return setErr("Could not save entry. Please retry.");
       log(`Expense recorded — NPR ${amount.toLocaleString("en-IN")} (${v("category").trim()})`);
     }
     close();
@@ -119,7 +122,7 @@ export function QuickCreateDialog({ kind, onClose }: { kind: CreateKind | null; 
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={close}>Cancel</Button>
-          <Button onClick={submit}>Save</Button>
+          <Button disabled={busy} onClick={async()=>{setBusy(true);try{await submit();}finally{setBusy(false);}}}>{busy?"Saving…":"Save"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
