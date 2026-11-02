@@ -277,7 +277,7 @@ export type Database = {
           created_by?: string | null
           description?: string
           id?: string
-          name: string
+          name?: string
           photo_path?: string | null
           role?: string
           status?: string
