@@ -48,13 +48,14 @@ function ProjectPage() {
         <div className="flex items-center gap-4">
           <DivIcon division={p.division} />
           <div>
-            <input value={p.name} onChange={(e) => update({ name: e.target.value })} className="w-full bg-transparent text-2xl font-semibold tracking-tight outline-none" />
+            <input key={p.id+"-name"} defaultValue={p.name} onBlur={(e) => update({ name: e.target.value })} className="w-full bg-transparent text-2xl font-semibold tracking-tight outline-none" />
             <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">{client?.name} · <StatusBadge status={p.status} overdue={isOverdue(p)} /></div>
           </div>
         </div>
-        <Button variant="ghost" className="text-danger" onClick={() => {
+        <Button variant="ghost" className="text-danger" onClick={async () => {
           if (!confirm("Delete this project and its payments/expenses?")) return;
-          set((d) => ({ ...d, projects: d.projects.filter((x) => x.id !== p.id), payments: d.payments.filter((x) => x.projectId !== p.id), expenses: d.expenses.filter((x) => x.projectId !== p.id) }));
+          const saved=await set((d) => ({ ...d, assignments:d.assignments.filter(x=>x.projectId!==p.id), invoices:d.invoices.map(x=>x.projectId===p.id?{...x,projectId:null}:x), projects: d.projects.filter((x) => x.id !== p.id), payments: d.payments.filter((x) => x.projectId !== p.id), expenses: d.expenses.filter((x) => x.projectId !== p.id) }));
+          if(!saved)return;
           log(`Project deleted: ${p.name}`);
           navigate({ to: "/projects" });
         }}><Trash2 className="h-4 w-4" /> Delete</Button>
@@ -108,7 +109,7 @@ function ProjectPage() {
             <Row label="Start"><Input type="date" value={p.startDate} onChange={(e) => update({ startDate: e.target.value })} /></Row>
             <Row label="Deadline"><Input type="date" value={p.deadline} onChange={(e) => update({ deadline: e.target.value })} /></Row>
           </div>
-          <Row label="Description"><textarea value={p.description} onChange={(e) => update({ description: e.target.value })} rows={3} className="w-full rounded-md border border-input bg-background p-2 text-sm" /></Row>
+          <Row label="Description"><textarea defaultValue={p.description} onBlur={(e) => update({ description: e.target.value })} rows={3} className="w-full rounded-md border border-input bg-background p-2 text-sm" /></Row>
         </section>
       </div>
 

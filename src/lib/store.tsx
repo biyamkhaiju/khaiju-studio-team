@@ -1,4 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { fetchLedger,saveLedger } from "./ledger.functions";
+import { ledgerSchema,emptyLedger,type LedgerData } from "./ledger-schema";
+import { useAuth } from "./auth";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
 export type Division = "wedding" | "website" | "ml";
 export type ProjectStatus = "planning" | "in_progress" | "in_review" | "completed" | "on_hold" | "cancelled";
@@ -26,17 +30,11 @@ export interface Project {
   milestones: Milestone[];
   manualProgress: number;
 }
-export interface Payment { id: string; projectId: string; amount: number; date: string; note: string }
+export interface Payment { id: string; projectId: string; invoiceId?: string | null; amount: number; date: string; note: string }
 export interface Expense { id: string; projectId: string | null; category: string; amount: number; date: string; note: string }
 export interface Activity { id: string; text: string; date: string }
 
-export interface Data {
-  clients: Client[];
-  projects: Project[];
-  payments: Payment[];
-  expenses: Expense[];
-  activity: Activity[];
-}
+export type Data = LedgerData;
 
 export const DIVISIONS: Record<Division, { label: string; short: string }> = {
   wedding: { label: "Wedding Invitations", short: "Wedding" },
@@ -52,59 +50,7 @@ export const STATUSES: Record<ProjectStatus, string> = {
   cancelled: "Cancelled",
 };
 
-export const uid = () => Math.random().toString(36).slice(2, 10);
-const day = (offset: number) => {
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return d.toISOString().slice(0, 10);
-};
-const ms = (titles: string[], doneCount: number): Milestone[] =>
-  titles.map((t, i) => ({ id: uid(), title: t, done: i < doneCount }));
-
-const WED = ["Requirements gathered", "Design draft", "Couple review", "Revisions", "Final delivery"];
-const WEB = ["Discovery", "Wireframes", "UI design", "Development", "Testing", "Launch"];
-const ML = ["Problem definition", "Data collection", "Preprocessing", "Model training", "Evaluation", "Deployment"];
-
-export function seedData(): Data {
-  const clients: Client[] = [
-    { id: "c1", name: "Ramesh & Sunita Sharma", kind: "wedding", email: "ramesh.sharma@gmail.com", phone: "+977 9841000001", location: "Kathmandu", createdAt: day(-40) },
-    { id: "c2", name: "Bikram Thapa — Himalayan Cafe", kind: "business", email: "bikram@himalayancafe.com.np", phone: "+977 9851000002", location: "Pokhara", createdAt: day(-55) },
-    { id: "c3", name: "Rai Family", kind: "wedding", email: "rai.family@gmail.com", phone: "+977 9861000003", location: "Dharan", createdAt: day(-30) },
-    { id: "c4", name: "Aadarsh Shrestha", kind: "business", email: "aadarsh@shrestha.dev", phone: "+977 9801000004", location: "Lalitpur", createdAt: day(-20) },
-    { id: "c5", name: "Khaiju Studio (Internal)", kind: "internal", email: "studio@khaiju.com", phone: "", location: "Bhaktapur", createdAt: day(-120) },
-    { id: "c6", name: "Everest Treks Pvt. Ltd.", kind: "business", email: "info@everesttreks.com.np", phone: "+977 9811000006", location: "Kathmandu", createdAt: day(-8) },
-  ];
-  const projects: Project[] = [
-    { id: "p1", name: "Sharma Wedding Invitation", division: "wedding", clientId: "c1", status: "in_progress", budget: 25000, startDate: day(-25), deadline: day(4), description: "Animated invitation website with RSVP and venue map.", milestones: ms(WED, 3), manualProgress: 0 },
-    { id: "p2", name: "The Himalayan Cafe Website", division: "website", clientId: "c2", status: "in_progress", budget: 60000, startDate: day(-40), deadline: day(12), description: "Restaurant site with menu, reservations and gallery.", milestones: ms(WEB, 4), manualProgress: 0 },
-    { id: "p3", name: "Trekking Risk Prediction Model", division: "ml", clientId: "c6", status: "in_progress", budget: 80000, startDate: day(-35), deadline: day(20), description: "Predict altitude-sickness risk from trek itinerary and weather data.", milestones: ms(ML, 2), manualProgress: 0 },
-    { id: "p4", name: "Rai Family Invitation Card", division: "wedding", clientId: "c3", status: "completed", budget: 18000, startDate: day(-30), deadline: day(-6), description: "Digital invitation card in Nepali and English.", milestones: ms(WED, 5), manualProgress: 0 },
-    { id: "p5", name: "Portfolio Website", division: "website", clientId: "c4", status: "in_review", budget: 15000, startDate: day(-18), deadline: day(2), description: "Personal developer portfolio.", milestones: ms(WEB, 5), manualProgress: 0 },
-    { id: "p6", name: "Nepali Handwriting OCR", division: "ml", clientId: "c5", status: "planning", budget: 0, startDate: day(-5), deadline: day(45), description: "Internal R&D: Devanagari handwriting recognition.", milestones: ms(ML, 1), manualProgress: 0 },
-    { id: "p7", name: "Everest Treks Booking Site", division: "website", clientId: "c6", status: "planning", budget: 90000, startDate: day(-2), deadline: day(-1), description: "Booking platform with package catalogue.", milestones: ms(WEB, 0), manualProgress: 0 },
-  ];
-  const payments: Payment[] = [
-    { id: uid(), projectId: "p1", amount: 12500, date: day(-20), note: "50% advance" },
-    { id: uid(), projectId: "p2", amount: 30000, date: day(-35), note: "Advance" },
-    { id: uid(), projectId: "p2", amount: 10000, date: day(-3), note: "Milestone payment" },
-    { id: uid(), projectId: "p3", amount: 40000, date: day(-30), note: "Advance" },
-    { id: uid(), projectId: "p4", amount: 18000, date: day(-6), note: "Full payment" },
-    { id: uid(), projectId: "p5", amount: 7500, date: day(-15), note: "Advance" },
-  ];
-  const expenses: Expense[] = [
-    { id: uid(), projectId: "p2", category: "Hosting", amount: 4500, date: day(-10), note: "Annual hosting" },
-    { id: uid(), projectId: "p3", category: "Cloud GPU", amount: 12000, date: day(-12), note: "Training runs" },
-    { id: uid(), projectId: null, category: "Software", amount: 3200, date: day(-4), note: "Design tool subscription" },
-    { id: uid(), projectId: "p1", category: "Domain", amount: 1500, date: day(-22), note: ".com domain" },
-  ];
-  const activity: Activity[] = [
-    { id: uid(), text: "Payment received — NPR 10,000 from Himalayan Cafe", date: new Date(Date.now() - 3 * 3600e3).toISOString() },
-    { id: uid(), text: "Portfolio Website moved to In Review", date: new Date(Date.now() - 5 * 3600e3).toISOString() },
-    { id: uid(), text: "New client registered: Everest Treks Pvt. Ltd.", date: new Date(Date.now() - 26 * 3600e3).toISOString() },
-  ];
-  return { clients, projects, payments, expenses, activity };
-}
-
+export const uid = () => crypto.randomUUID();
 // ---------- calculations ----------
 export const progressOf = (p: Project) =>
   p.milestones.length ? Math.round((p.milestones.filter((m) => m.done).length / p.milestones.length) * 100) : p.manualProgress;
@@ -116,7 +62,7 @@ export const outstandingFor = (d: Data, p: Project) =>
   p.status === "cancelled" ? 0 : Math.max(0, p.budget - paidFor(d, p.id));
 
 export const isOverdue = (p: Project) =>
-  p.status !== "completed" && p.status !== "cancelled" && p.deadline < new Date().toISOString().slice(0, 10);
+  !!p.deadline && p.status !== "completed" && p.status !== "cancelled" && p.deadline < new Date().toISOString().slice(0, 10);
 
 export const daysUntil = (date: string) =>
   Math.ceil((new Date(date + "T00:00:00").getTime() - new Date(new Date().toISOString().slice(0, 10) + "T00:00:00").getTime()) / 86400e3);
@@ -133,43 +79,26 @@ export function rangeStart(r: RangeKey): string {
 
 export const npr = (n: number) => "NPR " + n.toLocaleString("en-IN");
 
-// ---------- store ----------
-const KEY = "khaiju-studio-data-v1";
+// ---------- database-backed store ----------
 interface Store {
-  data: Data;
-  set: (fn: (d: Data) => Data) => void;
-  log: (text: string) => void;
-  reset: () => void;
+ data: Data; set: (fn:(d:Data)=>Data)=>Promise<boolean>; log:(text:string)=>void;
+ loading:boolean; saving:boolean; error:string; reload:()=>Promise<void>;
 }
-const Ctx = createContext<Store | null>(null);
-
-export function StoreProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<Data>(seedData);
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setData(JSON.parse(raw));
-    } catch {}
-    setLoaded(true);
-  }, []);
-  useEffect(() => {
-    if (loaded) localStorage.setItem(KEY, JSON.stringify(data));
-  }, [data, loaded]);
-  const value = useMemo<Store>(
-    () => ({
-      data,
-      set: (fn) => setData((d) => fn(d)),
-      log: (text) => setData((d) => ({ ...d, activity: [{ id: uid(), text, date: new Date().toISOString() }, ...d.activity].slice(0, 50) })),
-      reset: () => setData(seedData()),
-    }),
-    [data],
-  );
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+const Ctx=createContext<Store|null>(null);
+export function StoreProvider({children}:{children:ReactNode}) {
+ const {session,ready}=useAuth();
+ const fetchData=useServerFn(fetchLedger), saveData=useServerFn(saveLedger);
+ const [data,setData]=useState<Data>(emptyLedger),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState("");
+ const current=useRef<Data>(data), queue=useRef<Promise<unknown>>(Promise.resolve()), identity=useRef(session?.user.id);
+ identity.current=session?.user.id;
+ async function reload(){if(!session){setLoading(false);return;}const owner=session.user.id;setLoading(true);try{const next=await fetchData();if(identity.current!==owner)return;current.current=next;setData(next);setError("");}catch(e){setError(e instanceof Error?e.message:"Could not load records.");}finally{setLoading(false);}}
+ useEffect(()=>{current.current=emptyLedger();setData(current.current);if(ready)void reload();},[session?.user.id,ready]);
+ useEffect(()=>{const refresh=()=>{if(session&&!saving)void reload();};window.addEventListener("focus",refresh);const timer=window.setInterval(refresh,60000);return()=>{window.removeEventListener("focus",refresh);window.clearInterval(timer);};},[session?.user.id,saving]);
+ const set=(fn:(d:Data)=>Data):Promise<boolean>=>{
+ const owner=session?.user.id;
+ const operation=queue.current.then(async()=>{if(!owner||identity.current!==owner){setError("Sign in to save records.");return false;}setSaving(true);try{const before=current.current,after=ledgerSchema.parse(fn(before));await saveData({data:{before,after}});if(identity.current!==owner)return false;current.current=after;setData(after);setError("");return true;}catch(e){setError(e instanceof Error?e.message:"Could not save records.");return false;}finally{setSaving(false);}});queue.current=operation;return operation;
+ };
+ const value:Store={data,set,log:text=>{void set(d=>({...d,activity:[{id:uid(),text,date:new Date().toISOString()},...d.activity]}));},loading,saving,error,reload};
+ return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
-
-export function useStore() {
-  const s = useContext(Ctx);
-  if (!s) throw new Error("useStore outside provider");
-  return s;
-}
+export function useStore(){const store=useContext(Ctx);if(!store)throw new Error("useStore outside provider");return store;}
