@@ -10,6 +10,8 @@ import { QuickCreateDialog, type CreateKind } from "./QuickCreate";
 import { useStore, isOverdue, daysUntil } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme";
+import { useAuth, SignInPanel } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 type Item = { label: string; to: string; search?: Record<string, string> };
 type Group = { label: string; icon: typeof Heart; to?: string; items?: Item[] };
@@ -36,7 +38,7 @@ const NAV: Group[] = [
     { label: "All Clients", to: "/clients" }, { label: "Leads", to: soon("leads") }, { label: "Meetings", to: soon("meetings") },
   ]},
   { label: "Finance & Invoices", icon: Wallet, items: [
-    { label: "Financial Overview", to: "/finance" }, { label: "Invoices", to: soon("invoices") },
+    { label: "Financial Overview", to: "/finance" }, { label: "Invoices", to: "/invoices" },
   ]},
   { label: "Our Team", icon: UsersRound, to: "/team" },
   { label: "Content & Media", icon: Image, to: soon("media") },
@@ -48,6 +50,8 @@ const QCtx = createContext<(k: CreateKind) => void>(() => {});
 export const useQuickCreate = () => useContext(QCtx);
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const { session,ready }=useAuth();
+  const {loading,error,saving,reload}=useStore();
   const [create, setCreate] = useState<CreateKind | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const path = useRouterState({ select: (s) => s.location.href });
@@ -65,7 +69,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         {mobileOpen && <div className="fixed inset-0 z-30 bg-background/70 lg:hidden" onClick={() => setMobileOpen(false)} />}
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar onMenu={() => setMobileOpen(true)} onCreate={setCreate} />
-          <main className="flex-1 px-4 py-6 md:px-8">{children}</main>
+          <main className="flex-1 px-4 py-6 md:px-8">
+            {saving&&<p role="status" className="mb-3 text-xs text-muted-foreground">Saving changes…</p>}
+            {error&&<div role="alert" className="mb-5 flex flex-wrap items-center gap-3 border-l-2 border-danger bg-danger/10 p-4 text-sm text-danger"><span>{error}</span><Button variant="secondary" size="sm" onClick={()=>void reload()}>Retry</Button></div>}
+            {!ready?<p className="py-10 text-muted-foreground">Loading account…</p>:!session&&path!=="/team"?<SignInPanel/>:session&&loading?<p className="py-10 text-muted-foreground">Loading your records…</p>:children}
+          </main>
         </div>
       </div>
       <QuickCreateDialog kind={create} onClose={() => setCreate(null)} />
@@ -129,6 +137,8 @@ function Sidebar({ onClose }: { onClose: () => void }) {
 }
 
 function TopBar({ onMenu, onCreate }: { onMenu: () => void; onCreate: (k: CreateKind) => void }) {
+  const {session,profile,avatar}=useAuth();
+  const displayName=profile?.display_name || session?.user.email?.split("@")[0] || "Guest";
   const { data } = useStore();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -204,12 +214,13 @@ function TopBar({ onMenu, onCreate }: { onMenu: () => void; onCreate: (k: Create
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-auto px-1.5" aria-label="Profile menu">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-xs font-semibold text-primary">BK</span>
-              <span className="hidden text-left leading-tight md:block"><span className="block text-sm">Biyam Khaiju</span><span className="block text-[11px] text-muted-foreground">Founder</span></span>
+              <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-primary/20 text-xs font-semibold text-primary">{avatar?<img src={avatar} alt="Your avatar" className="h-full w-full object-cover"/>:displayName.slice(0,2).toUpperCase()}</span>
+              <span className="hidden max-w-36 truncate text-left leading-tight md:block"><span className="block text-sm">{displayName}</span><span className="block text-[11px] text-muted-foreground">{session?"Studio account":"Signed out"}</span></span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onSelect={() => navigate({ to: "/settings" })}>Profile settings</DropdownMenuItem>
+            {session&&<DropdownMenuItem onSelect={()=>void supabase.auth.signOut()}>Sign out</DropdownMenuItem>}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

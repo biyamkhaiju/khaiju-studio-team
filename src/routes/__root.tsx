@@ -15,6 +15,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { StoreProvider } from "../lib/store";
 import { AppShell } from "../components/studio/AppShell";
 import { ThemeProvider } from "../lib/theme";
+import { AuthProvider } from "../lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -119,11 +121,13 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router=useRouter();
+  useEffect(()=>{const {data:{subscription}}=supabase.auth.onAuthStateChange(event=>{if(!["SIGNED_IN","SIGNED_OUT","USER_UPDATED"].includes(event))return;void router.invalidate();if(event!=="SIGNED_OUT")void queryClient.invalidateQueries();});return()=>subscription.unsubscribe();},[router,queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <ThemeProvider><StoreProvider><AppShell><Outlet /></AppShell></StoreProvider></ThemeProvider>
+      <ThemeProvider><AuthProvider><StoreProvider><AppShell><Outlet /></AppShell></StoreProvider></AuthProvider></ThemeProvider>
     </QueryClientProvider>
   );
 }
