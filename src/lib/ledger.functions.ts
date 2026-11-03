@@ -23,5 +23,7 @@ export const saveLedger = createServerFn({method:"POST"}).middleware([requireSup
  for(const [field,value] of Object.entries(row)) { if(field==="createdAt")continue; const target=key==="activity"&&field==="date"?"created_at":snake[field]??field; mapped[target]=(["clientId","projectId","invoiceId"].includes(field)&&value==="")?null:value as Json; }
  changes.push({table:tableMap[key],operation:"upsert",id:row.id,row:mapped});
  }
- const {error}=await context.supabase.rpc("apply_ledger_changes",{changes}); if(error)throw new Error(error.message); return {ok:true};
+  // Persist retained rows and detached references before removing their former parents.
+  const ordered=[...changes.filter(c=>typeof c==="object"&&c!==null&&!Array.isArray(c)&&c["operation"]==="upsert"),...changes.filter(c=>typeof c==="object"&&c!==null&&!Array.isArray(c)&&c["operation"]==="delete")];
+  const {error}=await context.supabase.rpc("apply_ledger_changes",{changes:ordered}); if(error)throw new Error(error.message); return {ok:true};
 });
