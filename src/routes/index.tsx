@@ -5,15 +5,16 @@ import { FolderKanban, Wallet, AlertCircle, Users, ChevronRight, Heart, Globe, B
 import { DIVISIONS, useStore, progressOf, paidFor, outstandingFor, isOverdue, daysUntil, rangeStart, npr, type Division, type RangeKey } from "@/lib/store";
 import { DivIcon, ProgressBar, StatusBadge, DIV_STYLE } from "@/components/studio/ui";
 import { useQuickCreate } from "@/components/studio/AppShell";
+import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Khaiju Studio" },
-      { name: "description", content: "Khaiju Studio command center: projects, progress, revenue and deadlines at a glance." },
-      { property: "og:title", content: "Dashboard — Khaiju Studio" },
-      { property: "og:description", content: "Khaiju Studio command center: projects, progress, revenue and deadlines at a glance." },
+      { title: "Dashboard — SainoX Dashboard" },
+      { name: "description", content: "SainoX Dashboard command center: projects, progress, revenue and deadlines at a glance." },
+      { property: "og:title", content: "Dashboard — SainoX Dashboard" },
+      { property: "og:description", content: "SainoX Dashboard command center: projects, progress, revenue and deadlines at a glance." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -32,6 +33,7 @@ function greeting() {
 
 function Dashboard() {
   const { data } = useStore();
+  const { profile } = useAuth();
   const quick = useQuickCreate();
   const [range, setRange] = useState<RangeKey>("month");
   const [tab, setTab] = useState<Division | "all">("all");
@@ -63,8 +65,8 @@ function Dashboard() {
     <div className="mx-auto max-w-[1400px] space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{greeting()}, Biyam! 👋</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Here's what's happening across your studio.</p>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">SainoX Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{greeting()}{profile?.display_name ? `, ${profile.display_name}` : ""}. Every project. Every possibility.</p>
         </div>
         <div className="flex items-center gap-3">
           <span className="hidden text-sm text-muted-foreground sm:block">{now.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</span>

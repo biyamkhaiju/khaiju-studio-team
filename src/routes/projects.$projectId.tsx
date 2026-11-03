@@ -11,9 +11,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 export const Route = createFileRoute("/projects/$projectId")({
   head: () => ({
     meta: [
-      { title: "Project details — Khaiju Studio" },
+      { title: "Project details — SainoX Dashboard" },
       { name: "description", content: "Project milestones, finances and status." },
-      { property: "og:title", content: "Project details — Khaiju Studio" },
+      { property: "og:title", content: "Project details — SainoX Dashboard" },
       { property: "og:description", content: "Project milestones, finances and status." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

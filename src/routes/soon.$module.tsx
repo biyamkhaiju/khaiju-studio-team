@@ -4,10 +4,10 @@ import { Construction } from "lucide-react";
 export const Route = createFileRoute("/soon/$module")({
   head: () => ({
     meta: [
-      { title: "Coming next — Khaiju Studio" },
-      { name: "description", content: "This Khaiju Studio module is scheduled for an upcoming phase." },
-      { property: "og:title", content: "Coming next — Khaiju Studio" },
-      { property: "og:description", content: "This Khaiju Studio module is scheduled for an upcoming phase." },
+      { title: "Coming next — SainoX Dashboard" },
+      { name: "description", content: "This SainoX Dashboard module is scheduled for an upcoming phase." },
+      { property: "og:title", content: "Coming next — SainoX Dashboard" },
+      { property: "og:description", content: "This SainoX Dashboard module is scheduled for an upcoming phase." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

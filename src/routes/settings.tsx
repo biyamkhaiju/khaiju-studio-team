@@ -8,10 +8,10 @@ import { Sun, Moon, Download } from "lucide-react";
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
-      { title: "Settings — Khaiju Studio" },
-      { name: "description", content: "Khaiju Studio workspace settings and data controls." },
-      { property: "og:title", content: "Settings — Khaiju Studio" },
-      { property: "og:description", content: "Khaiju Studio workspace settings and data controls." },
+      { title: "Settings — SainoX Dashboard" },
+      { name: "description", content: "SainoX Dashboard workspace settings and data controls." },
+      { property: "og:title", content: "Settings — SainoX Dashboard" },
+      { property: "og:description", content: "SainoX Dashboard workspace settings and data controls." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
