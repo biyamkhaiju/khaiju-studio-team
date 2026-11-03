@@ -151,3 +151,7 @@
 @keyframes status-ping { 0% { transform: scale(1); opacity: .7; } 80%, 100% { transform: scale(2.4); opacity: 0; } }
 @utility animate-team-rise { animation: team-rise .5s cubic-bezier(.2,.8,.2,1) both; }
 @utility animate-status-ping { animation: status-ping 1.6s cubic-bezier(0,0,.2,1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}

@@ -10,10 +10,10 @@ import { Input } from "@/components/ui/input";
 export const Route = createFileRoute("/clients")({
   head: () => ({
     meta: [
-      { title: "Clients — Khaiju Studio" },
-      { name: "description", content: "Every Khaiju Studio client with their projects and balances." },
-      { property: "og:title", content: "Clients — Khaiju Studio" },
-      { property: "og:description", content: "Every Khaiju Studio client with their projects and balances." },
+      { title: "Clients — SainoX Dashboard" },
+      { name: "description", content: "Every SainoX Dashboard client with their projects and balances." },
+      { property: "og:title", content: "Clients — SainoX Dashboard" },
+      { property: "og:description", content: "Every SainoX Dashboard client with their projects and balances." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

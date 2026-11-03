@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, Heart, Globe, BrainCircuit, FlaskConical, Users, Wallet, Image, CalendarDays, Settings,
-  UsersRound, ChevronDown, Search, Bell, Plus, Menu, X, Mountain, Sun, Moon,
+  UsersRound, ChevronDown, Search, Bell, Plus, Menu, X, Sun, Moon,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { useStore, isOverdue, daysUntil } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme";
 import { useAuth, SignInPanel } from "@/lib/auth";
+import logo from "@/assets/sainox-logo.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 
 type Item = { label: string; to: string; search?: Record<string, string> };
@@ -91,10 +92,10 @@ function Sidebar({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex h-full flex-col p-4">
       <div className="mb-6 flex items-center gap-3 px-2">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 text-primary"><Mountain className="h-5 w-5" /></span>
+        <img src={logo.url} alt="SainoX logo" className="h-12 w-16 shrink-0 rounded-md object-cover" />
         <div className="flex-1">
-          <div className="text-sm font-bold tracking-wide">KHAIJU STUDIO</div>
-          <div className="text-[11px] text-muted-foreground">Build • Create • Grow</div>
+          <div className="text-sm font-bold tracking-wide">SainoX</div>
+          <div className="text-[11px] text-muted-foreground">Dashboard · Create with purpose</div>
         </div>
         <button className="lg:hidden" onClick={onClose} aria-label="Close menu"><X className="h-4 w-4" /></button>
       </div>
@@ -215,7 +216,7 @@ function TopBar({ onMenu, onCreate }: { onMenu: () => void; onCreate: (k: Create
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-auto px-1.5" aria-label="Profile menu">
               <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-primary/20 text-xs font-semibold text-primary">{avatar?<img src={avatar} alt="Your avatar" className="h-full w-full object-cover"/>:displayName.slice(0,2).toUpperCase()}</span>
-              <span className="hidden max-w-36 truncate text-left leading-tight md:block"><span className="block text-sm">{displayName}</span><span className="block text-[11px] text-muted-foreground">{session?"Studio account":"Signed out"}</span></span>
+              <span className="hidden max-w-36 truncate text-left leading-tight md:block"><span className="block text-sm">{displayName}</span><span className="block text-[11px] text-muted-foreground">{session?"SainoX account":"Signed out"}</span></span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

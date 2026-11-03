@@ -91,7 +91,7 @@ export function StoreProvider({children}:{children:ReactNode}) {
  const [data,setData]=useState<Data>(emptyLedger),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState("");
  const current=useRef<Data>(data), queue=useRef<Promise<unknown>>(Promise.resolve()), identity=useRef(session?.user.id);
  identity.current=session?.user.id;
- async function reload(){if(!session){setLoading(false);return;}const owner=session.user.id;setLoading(true);try{const next=await fetchData();if(identity.current!==owner)return;current.current=next;setData(next);setError("");}catch(e){setError(e instanceof Error?e.message:"Could not load records.");}finally{setLoading(false);}}
+ async function reload(){if(!session){setLoading(false);return;}const owner=session.user.id;const operation=queue.current.then(async()=>{if(identity.current!==owner)return;setLoading(true);try{const next=await fetchData();if(identity.current!==owner)return;current.current=next;setData(next);setError("");}catch(e){if(identity.current===owner)setError(e instanceof Error?e.message:"Could not load records.");}finally{if(identity.current===owner)setLoading(false);}});queue.current=operation;await operation;}
  useEffect(()=>{current.current=emptyLedger();setData(current.current);if(ready)void reload();},[session?.user.id,ready]);
  useEffect(()=>{const refresh=()=>{if(session&&!saving)void reload();};window.addEventListener("focus",refresh);const timer=window.setInterval(refresh,60000);return()=>{window.removeEventListener("focus",refresh);window.clearInterval(timer);};},[session?.user.id,saving]);
  const set=(fn:(d:Data)=>Data):Promise<boolean>=>{

@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/finance")({
   head: () => ({
     meta: [
-      { title: "Finance — Khaiju Studio" },
+      { title: "Finance — SainoX Dashboard" },
       { name: "description", content: "Contracted, received, outstanding, expenses and profit per project in NPR." },
-      { property: "og:title", content: "Finance — Khaiju Studio" },
+      { property: "og:title", content: "Finance — SainoX Dashboard" },
       { property: "og:description", content: "Contracted, received, outstanding, expenses and profit per project in NPR." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

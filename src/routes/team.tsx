@@ -19,10 +19,10 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/team")({
   head: () => ({
     meta: [
-      { title: "Our Team — Khaiju Studio" },
-      { name: "description", content: "Meet the Khaiju Studio team and see who is available, working or on leave." },
-      { property: "og:title", content: "Our Team — Khaiju Studio" },
-      { property: "og:description", content: "Meet the Khaiju Studio team and see who is available, working or on leave." },
+      { title: "Our Team — SainoX Dashboard" },
+      { name: "description", content: "Meet the SainoX Dashboard team and see who is available, working or on leave." },
+      { property: "og:title", content: "Our Team — SainoX Dashboard" },
+      { property: "og:description", content: "Meet the SainoX Dashboard team and see who is available, working or on leave." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -118,7 +118,7 @@ function TeamPage() {
 
   return (
     <div className="mx-auto max-w-[1400px]">
-      <PageHeader title="Our Team" subtitle="The people behind Khaiju Studio">
+      <PageHeader title="Our Team" subtitle="The people behind SainoX Dashboard">
         <div className="flex items-center gap-2">
           {session ? (
             <>

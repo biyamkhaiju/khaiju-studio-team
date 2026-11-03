@@ -1,4 +1,7 @@
-# Khaiju Studio Ledger
+# SainoX Dashboard
+
+- [ ] Apply SainoX name and uploaded logo throughout the dashboard.
+- [ ] Fix project creation and current application errors.
 
 - [x] Inspect existing persistence, invoice implementation, and connection configuration.
 - [x] Inspect connected external Supabase schema, access rules, private storage, and existing app.
